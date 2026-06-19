@@ -629,6 +629,7 @@ function spin(){
   const bet=S.ln*BETS[S.bi];
   if(!S.fs&&S.bal<bet){flashE('dbal');return;}
   S.sp=true;S.win=0;
+  if(curLAnim){clearInterval(curLAnim); LCTX.clearRect(0,0,LC.width,LC.height);}
   document.getElementById('dwin').classList.remove('won');
   document.getElementById('spin').disabled=true;
   const g5b=document.getElementById('g5050');
@@ -653,11 +654,13 @@ function spin(){
 function evalW(){
   let tot=0;const bet=BETS[S.bi];
   const winRows=Array.from({length:5},()=>[]);
+  const wins = [];
 
   /* scatter */
   let sc=0;
   for(let r=0;r<5;r++)for(let row=0;row<3;row++)if(G[r][row].id==='book')sc++;
   if(sc>=3){
+    wins.push({idx:0, cnt:5});
     tot+=S.ln*bet*(sc===3?2:sc===4?20:200);
     if(!S.fs){
       S.fs=10;S.fsym=SY[Math.floor(Math.random()*SY.length)];
@@ -681,12 +684,13 @@ function evalW(){
     }
     let cnt=0;for(let r=0;r<5;r++){if(G[r][ln[r]].id===fi.id||G[r][ln[r]].id==='book')cnt++;else break;}
     if(cnt>=3){
+      wins.push({idx:l, cnt:cnt});
       tot+=(fi.pay[cnt]||0)*bet;
       for(let r=0;r<cnt;r++)if(!winRows[r].includes(ln[r]))winRows[r].push(ln[r]);
     }
   }
 
-  if(tot>0){
+    if(tot>0){ animL(wins);
     S.win=tot;S.bal+=tot;
     document.getElementById('dwin').classList.add('won');
     for(let r=0;r<5;r++)if(winRows[r].length)REELS[r].startWin(winRows[r]);
@@ -886,6 +890,46 @@ function buildPT(){
   });
 }
 
+
+/* ── GEWINNLINIEN ANIMATION ── */
+const LC = document.getElementById('lc');
+const LCTX = LC.getContext('2d');
+const L_COLS = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000', '#ffc0cb'];
+
+function drawL(idx, count) {
+  const w = LC.width = LC.offsetWidth;
+  const h = LC.height = LC.offsetHeight;
+  const cw = w / 5;
+  const ch = h / 3;
+  LCTX.clearRect(0, 0, w, h);
+  LCTX.strokeStyle = L_COLS[idx % L_COLS.length];
+  LCTX.lineWidth = 4;
+  LCTX.shadowBlur = 5;
+  LCTX.shadowColor = 'black';
+  LCTX.beginPath();
+  const line = PL[idx];
+  for (let i = 0; i < count; i++) {
+    const x = i * cw + cw / 2;
+    const y = line[i] * ch + ch / 2;
+    if (i === 0) LCTX.moveTo(x, y);
+    else LCTX.lineTo(x, y);
+  }
+  LCTX.stroke();
+}
+
+let curLAnim = null;
+function animL(wins) {
+  if (curLAnim) clearInterval(curLAnim);
+  if (!wins || wins.length === 0) return;
+  let i = 0;
+  const next = () => {
+    if (S.sp) { LCTX.clearRect(0, 0, LC.width, LC.height); clearInterval(curLAnim); return; }
+    drawL(wins[i].idx, wins[i].cnt);
+    i = (i + 1) % wins.length;
+  };
+  next();
+  curLAnim = setInterval(next, 1500);
+}
 /* ── CONTROLS ── */
 document.getElementById('bm').onclick=()=>{if(S.bi>0){S.bi--;ui();}};
 document.getElementById('bp').onclick=()=>{if(S.bi<BETS.length-1){S.bi++;ui();}};
