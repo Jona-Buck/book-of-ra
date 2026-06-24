@@ -1,14 +1,14 @@
 
 const I={
-  A:"../assets/A.webp",
-  K:"../assets/K.webp",
-  J:"../assets/J.webp",
-  Q:"../assets/Q.webp",
-  ten:"../assets/ten.webp",
-  isis:"../assets/isis.webp",
-  scarab:"../assets/scarab.webp",
-  exp:"../assets/exp.webp",
-  book:"../assets/book.webp",
+  A:"./assets/A.webp",
+  K:"./assets/K.webp",
+  J:"./assets/J.webp",
+  Q:"./assets/Q.webp",
+  ten:"./assets/ten.webp",
+  isis:"./assets/isis.webp",
+  scarab:"./assets/scarab.webp",
+  exp:"./assets/exp.webp",
+  book:"./assets/book.webp",
 };
 
 const SY=[
